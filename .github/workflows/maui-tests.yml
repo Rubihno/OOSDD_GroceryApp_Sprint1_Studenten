@@ -26,13 +26,14 @@ jobs:
          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
  
      - name: Installeer MAUI workloads
-       run:           
+       run: |         
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then 
             dotnet workload install maui-android
           elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             dotnet workload install maui-android
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             dotnet workload install maui-android ios # Bekijkt welk besturingssysteem gebruikt wordt en installeert de nodige workloads
+          fi
        shell: bash
  
      - name: Herstel afhankelijkheden
