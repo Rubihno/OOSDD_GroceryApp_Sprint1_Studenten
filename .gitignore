@@ -58,10 +58,22 @@ dlldata.c
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
 
-# .NET Core
+# .NET Core, MAUI
+package-lock.json
 project.lock.json
 project.fragment.lock.json
 artifacts/
+platforms/
+AppPackages/
+
+# Configuratie- en omgeving bestanden
+*.config
+*.ini
+*.env
+secrets.json 
+ 
+# macOS-specifieke bestanden
+.DS_Store
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
