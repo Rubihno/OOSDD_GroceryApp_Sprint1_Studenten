@@ -25,11 +25,14 @@ jobs:
        with:
          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
  
-     - name: Herstel MAUI workloads
-       run: dotnet workload restore
-
-     - name: Herstel NuGet-afhankelijkheden
-       run: dotnet restore
+     - name: Herstel workloads en afhankelijkheden
+       run: |
+         dotnet workload restore
+         if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+           dotnet restore --runtime win-x64
+         else
+           dotnet restore
+         fi
 
      - name: Bouw de Windows applicatie
        if: matrix.os == 'windows-latest'
