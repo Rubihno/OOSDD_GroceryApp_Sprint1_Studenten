@@ -25,22 +25,48 @@ jobs:
        with:
          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
  
-     - name: Installeer MAUI workloads
+     - name: Installeer MAUI workloads # Bekijkt welk besturingssysteem gebruikt wordt en installeert de nodige workloads
        run: |         
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then 
             dotnet workload install maui-android
           elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            dotnet workload install maui-android
+            dotnet workload install maui-android maui-windows
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            dotnet workload install maui-android ios # Bekijkt welk besturingssysteem gebruikt wordt en installeert de nodige workloads
-          fi
+            dotnet workload install maui-ios maui-maccatalyst
+          fi 
        shell: bash
  
      - name: Herstel afhankelijkheden
        run: dotnet restore
- 
-     - name: Bouw de applicatie
-       run: dotnet build --configuration Release --no-restore
- 
-     - name: Voer unit tests uit
-       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
+
+     - name: Bouw de Windows applicatie
+       if: matrix.os == 'windows-latest'
+       run: dotnet build --configuration Release --no-restore --framework net8.0-windows10.0.19041.0
+       
+     - name: Voer Windows unit tests uit
+       if: matrix.os == 'windows-latest'
+       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-windows10.0.19041.0
+
+     - name: Bouw de Android applicatie
+       if: matrix.os != 'macos-latest'
+       run: dotnet build --configuration Release --no-restore --framework net8.0-android 
+       
+     - name: Voer Android unit tests uit
+       if: matrix.os != 'macos-latest'
+       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-android
+    
+     - name: Bouw de IOS applicatie
+       if: matrix.os == 'macos-latest'
+       run: dotnet build --configuration Release --no-restore --framework net8.0-ios
+       
+     - name: Voer IOS unit tests uit
+       if: matrix.os == 'macos-latest'
+       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-ios
+
+     - name: Bouw de MacOS applicatie
+       if: matrix.os == 'macos-latest'
+       run: dotnet build --configuration Release --no-restore --framework net8.0-maccatalyst 
+       
+     - name: Voer MacOS unit tests uit
+       if: matrix.os == 'macos-latest'
+       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-maccatalyst      
