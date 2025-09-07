@@ -11,24 +11,35 @@ on:
  
 jobs:
   test:
-    runs-on: ubuntu-latest  # Of windows-latest/macOS-latest als specifiek platform nodig is
-    steps:
-      - name: Haal de repository op
-        uses: actions/checkout@v4
+   strategy:
+    matrix:
+      os: [ubuntu-latest, windows-latest, macos-latest] 
+   runs-on: ${{ matrix.os }} # Maakt het mogelijk om verschillende besturingssystemen te gebruiken
+   
+   steps:
+     - name: Haal de repository op
+       uses: actions/checkout@v4
+       
+     - name: Installeer .NET SDK
+       uses: actions/setup-dotnet@v3
+       with:
+         dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
  
-      - name: Installeer .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
+     - name: Installeer MAUI workloads
+       run:           
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then 
+            dotnet workload install maui-android
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            dotnet workload install maui-android
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            dotnet workload install maui-android ios # Bekijkt welk besturingssysteem gebruikt wordt en installeert de nodige workloads
+       shell: bash
  
-      - name: Installeer MAUI workloads
-        run: dotnet workload install maui-android
+     - name: Herstel afhankelijkheden
+       run: dotnet restore
  
-      - name: Herstel afhankelijkheden
-        run: dotnet restore
+     - name: Bouw de applicatie
+       run: dotnet build --configuration Release --no-restore
  
-      - name: Bouw de applicatie
-        run: dotnet build --configuration Release --no-restore
- 
-      - name: Voer unit tests uit
-        run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
+     - name: Voer unit tests uit
+       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
