@@ -12,7 +12,9 @@ namespace Grocery.App
             new Window(new AppShell())
             {
                 Width = 1280,
-                Height = 720
+                Height = 720,
+                X = 300,
+                Y = 150
             };
     }
 }
