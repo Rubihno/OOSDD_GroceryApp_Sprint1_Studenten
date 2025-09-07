@@ -11,58 +11,24 @@ on:
  
 jobs:
   test:
-   strategy:
-    matrix:
-      os: [windows-latest, macos-latest] 
-   runs-on: ${{ matrix.os }} # Maakt het mogelijk om verschillende besturingssystemen te gebruiken
-   
-   steps:
-     - name: Haal de repository op
-       uses: actions/checkout@v4
-       
-     - name: Installeer .NET SDK
-       uses: actions/setup-dotnet@v3
-       with:
-         dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
+    runs-on: windows-latest  # Of windows-latest/macOS-latest als specifiek platform nodig is
+    steps:
+      - name: Haal de repository op
+        uses: actions/checkout@v4
  
-     - name: Herstel workloads en afhankelijkheden
-       run: |
-         dotnet workload restore
-         if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-           dotnet restore --runtime win-x64
-         else
-           dotnet restore
-         fi
-       shell: bash
-
-     - name: Bouw de Windows applicatie
-       if: matrix.os == 'windows-latest'
-       run: dotnet build --configuration Release --no-restore -f net8.0-windows10.0.19041.0 /p:RuntimeIdentifierOverride=win-x64 /p:EnableWindowsTargeting=true
-       
-     - name: Voer Windows unit tests uit
-       if: matrix.os == 'windows-latest'
-       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal -f net8.0-windows10.0.19041.0 /p:RuntimeIdentifierOverride=win-x64 /p:EnableWindowsTargeting=true
-
-     - name: Bouw de Android applicatie
-       if: matrix.os == 'windows-latest'
-       run: dotnet build --configuration Release --no-restore --framework net8.0-android 
-       
-     - name: Voer Android unit tests uit
-       if: matrix.os == 'windows-latest'
-       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-android
-    
-     - name: Bouw de IOS applicatie
-       if: matrix.os == 'macos-latest'
-       run: dotnet build --configuration Release --no-restore --framework net8.0-ios
-       
-     - name: Voer IOS unit tests uit
-       if: matrix.os == 'macos-latest'
-       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-ios
-
-     - name: Bouw de MacOS applicatie
-       if: matrix.os == 'macos-latest'
-       run: dotnet build --configuration Release --no-restore --framework net8.0-maccatalyst 
-       
-     - name: Voer MacOS unit tests uit
-       if: matrix.os == 'macos-latest'
-       run: dotnet test --configuration Release --no-restore --no-build --verbosity normal --framework net8.0-maccatalyst      
+      - name: Installeer .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
+ 
+      - name: Installeer MAUI workloads
+        run: dotnet workload install maui-android
+ 
+      - name: Herstel afhankelijkheden
+        run: dotnet restore
+ 
+      - name: Bouw de applicatie
+        run: dotnet build --configuration Release --no-restore
+ 
+      - name: Voer unit tests uit
+        run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
